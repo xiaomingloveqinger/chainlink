@@ -68,10 +68,13 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y ca-certificates
 
-WORKDIR /root
-
 COPY --from=1 /go/bin/chainlink /usr/local/bin/
 
 EXPOSE 6688
+
+RUN useradd --uid 14933 --create-home chainlink
+USER chainlink
+WORKDIR /home/chainlink
+
 ENTRYPOINT ["chainlink"]
 CMD ["local", "node"]
