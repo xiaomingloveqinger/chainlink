@@ -7,6 +7,7 @@ import { ethers, Signer, ContractTransaction } from 'ethers'
 import { Provider } from 'ethers/providers'
 import { FunctionFragment } from 'ethers/utils'
 export * from './generated/LinkTokenFactory'
+export * as ovm from './generated/ovm/LinkTokenFactory'
 
 /**
  * The type of any function that is deployable
