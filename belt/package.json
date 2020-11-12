@@ -18,7 +18,7 @@
   },
   "bugs": "https://github.com/smartcontractkit/chainlink/issues",
   "dependencies": {
-    "@0x/sol-compiler": "^4.0.8",
+    "@0x/sol-compiler": "^4.3.1",
     "@krebernisak/ovm-compiler": "^4.0.9",
     "@oclif/command": "^1",
     "@oclif/config": "^1",

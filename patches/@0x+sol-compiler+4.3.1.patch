@@ -1,0 +1,14 @@
+diff --git a/node_modules/@0x/sol-compiler/lib/src/solc_wrapper_v05.js b/node_modules/@0x/sol-compiler/lib/src/solc_wrapper_v05.js
+index 20ae6f9..867f231 100644
+--- a/node_modules/@0x/sol-compiler/lib/src/solc_wrapper_v05.js
++++ b/node_modules/@0x/sol-compiler/lib/src/solc_wrapper_v05.js
+@@ -69,7 +69,9 @@ class SolcWrapperV05 extends solc_wrapper_1.SolcWrapper {
+             if (this._opts.useDockerisedSolc) {
+                 return compiler_1.compileDockerAsync(this.solidityVersion, input);
+             }
++            // Shim the old `compileStandardWrapper` function.
+             const solcInstance = yield compiler_1.getSolcJSAsync(this.solidityVersion, !!this._opts.isOfflineMode);
++            solcInstance.compileStandardWrapper = solcInstance.compile;
+             return compiler_1.compileSolcJSAsync(solcInstance, input);
+         });
+     }
