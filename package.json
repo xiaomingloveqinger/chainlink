@@ -57,7 +57,7 @@
     "**/@0x/subproviders": "^6.2.0",
     "**/source-map-support": "0.5.16",
     "**/yargs-parser": "^15.0.1",
-    "**/ganache-core": "2.10.2"
+    "**/ganache-core": "2.11.2"
   },
   "dependencies": {
     "tslib": "^1.11.1"
