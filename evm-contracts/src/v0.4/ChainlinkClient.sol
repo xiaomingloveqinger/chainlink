@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import "./Chainlink.sol";
 import "./interfaces/ENSInterface.sol";
-import "./interfaces/LinkTokenInterface.sol";
 import "./interfaces/ArbiterInterface.sol";
 import "./interfaces/ArbiterPointerInterface.sol";
 import "./interfaces/ChainlinkRequestInterface.sol";
@@ -17,18 +16,15 @@ import { ENSResolver as ENSResolver_Chainlink } from "./vendor/ENSResolver.sol";
 contract ChainlinkClient {
   using Chainlink for Chainlink.Request;
 
-  uint256 constant internal LINK = 10**18;
   uint256 constant private AMOUNT_OVERRIDE = 0;
   address constant private SENDER_OVERRIDE = 0x0;
   uint256 constant private ARGS_VERSION = 1;
-  bytes32 constant private ENS_TOKEN_SUBNAME = keccak256("link");
+  bytes32 constant private ENS_ETH_SUBNAME = keccak256("eth");
   bytes32 constant private ENS_ORACLE_SUBNAME = keccak256("oracle");
-  address constant private LINK_TOKEN_POINTER = 0x8EC1950DA4ea6c42C123811B58B925e3717854D5;
   address constant private ARBITER_ADDR_POINTER = 0xf016297a749D89e00880E5Db61210cE6777a530c;
 
   ENSInterface private ens;
   bytes32 private ensNode;
-  LinkTokenInterface private link;
   ArbiterInterface private arbiter;
   ChainlinkRequestInterface private oracle;
   uint256 private requests = 1;
@@ -38,12 +34,12 @@ contract ChainlinkClient {
   event ChainlinkFulfilled(bytes32 indexed id);
   event ChainlinkCancelled(bytes32 indexed id);
 
-  function getOracleParam() public returns (address, string){
+  function getOracleParam() internal returns (address, string){
     setArbiterAddress(ArbiterPointerInterface(ARBITER_ADDR_POINTER).getArbiterAddress());
     return arbiter.getOndutyOracle();
   }
 
-  function getScore(uint256 data) public returns (uint256) {
+  function getScore(uint256 data) internal returns (uint256) {
     return arbiter.score(data);
   }
 
@@ -95,7 +91,7 @@ contract ChainlinkClient {
     _req.nonce = requests;
     pendingRequests[requestId] = _oracle;
     emit ChainlinkRequested(requestId);
-    require(link.transferAndCall(_oracle, _payment, encodeRequest(_req)), "unable to transferAndCall to oracle");
+    require(true == _oracle.call.value(_payment).gas(1000000)(abi.encodeWithSignature("payOracleRequest(address,uint256,bytes)",this,_payment,encodeRequest(_req))),"unable to call payOracleRequest");
     requests += 1;
 
     return requestId;
@@ -135,38 +131,10 @@ contract ChainlinkClient {
 
   /**
    * @notice Sets the LINK token address
-   * @param _link The address of the LINK token contract
-   */
-  function setChainlinkToken(address _link) internal {
-    link = LinkTokenInterface(_link);
-  }
-
-  /**
-   * @notice Sets the LINK token address
    * @param _arbiter The address of the LINK token contract
    */
   function setArbiterAddress(address _arbiter) internal {
     arbiter = ArbiterInterface(_arbiter);
-  }
-
-  /**
-   * @notice Sets the Chainlink token address for the public
-   * network as given by the Pointer contract
-   */
-  function setPublicChainlinkToken() internal {
-    setChainlinkToken(PointerInterface(LINK_TOKEN_POINTER).getAddress());
-  }
-
-  /**
-   * @notice Retrieves the stored address of the LINK token
-   * @return The address of the LINK token
-   */
-  function chainlinkTokenAddress()
-  internal
-  view
-  returns (address)
-  {
-    return address(link);
   }
 
   /**
@@ -192,23 +160,6 @@ contract ChainlinkClient {
   notPendingRequest(_requestId)
   {
     pendingRequests[_requestId] = _oracle;
-  }
-
-  /**
-   * @notice Sets the stored oracle and LINK token contracts with the addresses resolved by ENS
-   * @dev Accounts for subnodes having different resolvers
-   * @param _ens The address of the ENS contract
-   * @param _node The ENS node hash
-   */
-  function useChainlinkWithENS(address _ens, bytes32 _node)
-  internal
-  {
-    ens = ENSInterface(_ens);
-    ensNode = _node;
-    bytes32 linkSubnode = keccak256(abi.encodePacked(ensNode, ENS_TOKEN_SUBNAME));
-    ENSResolver_Chainlink resolver = ENSResolver_Chainlink(ens.resolver(linkSubnode));
-    setChainlinkToken(resolver.addr(linkSubnode));
-    updateChainlinkOracleWithENS();
   }
 
   /**

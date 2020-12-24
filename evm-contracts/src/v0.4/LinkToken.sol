@@ -5,12 +5,13 @@ import "./ERC677Token.sol";
 import { StandardToken as linkStandardToken } from "./vendor/StandardToken.sol";
 
 
-contract LinkToken is linkStandardToken, ERC677Token {
+contract LinkToken is StandardToken, ERC677Token {
 
   uint public totalSupply ;
   string public constant name = 'ChainLink Token';
   uint8 public constant decimals = 18;
   string public constant symbol = 'LINK';
+  uint256 private factor = 1000;
 
   function LinkToken()
   public
@@ -18,18 +19,17 @@ contract LinkToken is linkStandardToken, ERC677Token {
 
   }
 
-
   function() payable public {
     require(msg.value > 0);
-    balances[msg.sender] = balances[msg.sender].add(msg.value);
-    totalSupply = totalSupply.add(msg.value);
+    balances[msg.sender] = balances[msg.sender].add(msg.value.mul(factor));
+    totalSupply = totalSupply.add(msg.value.mul(factor));
   }
 
   function withdrawEther(uint256 amount) {
-    require(balances[msg.sender] >= amount);
+    require(balances[msg.sender] >= amount.mul(factor));
     msg.sender.transfer(amount);
-    balances[msg.sender] = balances[msg.sender].sub(amount);
-    totalSupply = totalSupply.sub(amount);
+    balances[msg.sender] = balances[msg.sender].sub(amount.mul(factor));
+    totalSupply = totalSupply.sub(amount.mul(factor));
   }
 
   /**

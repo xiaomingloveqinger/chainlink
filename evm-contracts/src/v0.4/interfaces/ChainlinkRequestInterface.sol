@@ -18,4 +18,11 @@ interface ChainlinkRequestInterface {
     bytes4 callbackFunctionId,
     uint256 expiration
   ) external;
+
+  function payOracleRequest(
+    address _sender,
+    uint256 _amount,
+    bytes _data
+  )
+  payable public;
 }
