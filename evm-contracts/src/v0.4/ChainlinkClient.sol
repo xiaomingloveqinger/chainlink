@@ -21,7 +21,7 @@ contract ChainlinkClient {
   uint256 constant private ARGS_VERSION = 1;
   bytes32 constant private ENS_ETH_SUBNAME = keccak256("eth");
   bytes32 constant private ENS_ORACLE_SUBNAME = keccak256("oracle");
-  address constant private ARBITER_ADDR_POINTER = 0xf016297a749D89e00880E5Db61210cE6777a530c;
+  address constant private ARBITER_ADDR_POINTER = 0xcf199f9e0fed7b4487ff245a27757a605ed02059;
 
   ENSInterface private ens;
   bytes32 private ensNode;
