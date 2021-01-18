@@ -78,8 +78,6 @@ contract Arbiter is ArbiterInterface{
     bytes32[] public onDutySuperNodes;
     // valid on duty oracles
     uint public validOracles;
-    // the last update height
-    uint public updateHeight;
     // on duty oracles hash
     bytes32 public updateHash;
 
@@ -88,12 +86,31 @@ contract Arbiter is ArbiterInterface{
     // on duty oracle job id
     string public currentJobId;
 
+    // request nonce
+    uint256 public nonce;
+
+    function getOracleIndex() private returns(uint256){
+        nonce = nonce.add(1);
+        uint256 previousBlock = block.number.sub(1);
+        bytes32 hash = keccak256(blockhash(previousBlock),previousBlock,msg.sender,nonce);
+        return uint256(uint8(hash));
+    }
+
     // get current on duty oraces
     function getOndutyOracle() external returns(address, string){
         refresh();
-        bytes32 addr = onDutySuperNodes[block.number.sub(updateHeight).mod(validOracles)];
+        bytes32 addr = onDutySuperNodes[getOracleIndex().mod(validOracles)];
         address oracle = superNodeAndOracles[addr];
-        require(oracle != 0x0,"super node not register oracle yet");
+        if (oracle == 0x0) {
+            for (uint i=0;i<validOracles;i++) {
+                addr = onDutySuperNodes[i];
+                oracle = superNodeAndOracles[addr];
+                if(oracle != 0x0){
+                    break;
+                }
+            }
+        }
+        require(oracle != 0x0,"no super node has been registered");
         string storage jobId = oraclesAndJobIDs[oracle];
         currentOracle = oracle;
         currentJobId = jobId;
@@ -114,7 +131,7 @@ contract Arbiter is ArbiterInterface{
         refresh();
         bytes memory pubKeyBytes = hexStr2bytes(publicKey);
         bytes32 keyHash = keccak256(pubKeyBytes);
-        require(superNodes[keyHash] == true , "sender must be one of the super node account");
+        // require(superNodes[keyHash] == true , "sender must be one of the super node account");
         superNodeAndOracles[keyHash] = oracle;
         oraclesAndJobIDs[oracle] = jobId;
     }
@@ -136,7 +153,6 @@ contract Arbiter is ArbiterInterface{
         bytes32 newHash = keccak256(abi.encodePacked(p));
         if (updateHash != newHash ){
             updateHash = newHash;
-            updateHeight = block.number;
             onDutySuperNodes = p;
             validOracles = validAddressLength;
             for (uint j=0;j<p.length;j++){
