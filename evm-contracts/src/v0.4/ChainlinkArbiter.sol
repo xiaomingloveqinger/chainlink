@@ -124,7 +124,7 @@ contract Arbiter is ArbiterInterface{
         bytes32[36] memory p;
         uint  input;
         assembly {
-            if iszero(staticcall(gas, 20, input, 0x00, p, 0xC0)) {
+            if iszero(staticcall(gas, 20, input, 0x00, p, 0x480)) {
                 revert(0,0)
             }
         }
@@ -154,7 +154,7 @@ contract Arbiter is ArbiterInterface{
         uint256[1] memory p;
 
         assembly {
-            if iszero(staticcall(gas, 21, input, 193, p, 0xc0)) {
+            if iszero(staticcall(gas, 21, input, 193, p, 0x20)) {
                 revert(0,0)
             }
         }
